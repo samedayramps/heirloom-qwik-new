@@ -1,6 +1,7 @@
-import { component$, Slot, useStore, useOnDocument, $ } from "@builder.io/qwik";
+import { component$, Slot, useStore, useOnDocument, $, useTask$ } from "@builder.io/qwik";
 import type { RequestHandler } from "@builder.io/qwik-city";
 import { NavBar } from '~/components/NavBar/NavBar';
+import { Footer } from '~/components/Footer/Footer';
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   cacheControl({
@@ -13,6 +14,13 @@ export default component$(() => {
   const store = useStore({
     isModalOpen: false,
     ModalComponent: null as any,
+  });
+
+  useTask$(({ track }) => {
+    track(() => store.isModalOpen);
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = store.isModalOpen ? 'hidden' : '';
+    }
   });
 
   useOnDocument(
@@ -35,9 +43,10 @@ export default component$(() => {
           store.isModalOpen = true;
         })}
       />
-      <main class="flex-grow pt-16"> {/* Added pt-16 to account for navbar height */}
+      <main class="flex-grow pt-16">
         <Slot />
       </main>
+      <Footer />
       {store.isModalOpen && store.ModalComponent && (
         <store.ModalComponent 
           onClose$={() => store.isModalOpen = false}

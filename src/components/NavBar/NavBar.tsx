@@ -1,4 +1,3 @@
-import ImgLogo from '~/media/images/logo.svg?jsx';
 import { component$, useSignal, type QRL, useVisibleTask$ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
 
@@ -77,12 +76,11 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
                 </button>
 
                 <Link href="/" class="flex-shrink-0">
-                  <ImgLogo 
-                    class="h-8 w-auto" 
-                    role="img"
-                  >
-                    <title>Heirloom Wedding Films Logo</title>
-                  </ImgLogo>
+                  <img 
+                    src="/images/logo.svg" 
+                    alt="Heirloom Wedding Films Logo" 
+                    class="h-8 w-auto"
+                  />
                 </Link>
 
                 <div class="hidden md:block">
