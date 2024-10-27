@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Ephesis&family=Open+Sans:wght@400&family=Playfair+Display:wght@300&display=swap');
+
+/**
+ * Tailwind CSS imports
+ * View the full documentation at https://tailwindcss.com
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-opensans;
+    /* Remove the padding-top */
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-playfair;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium;
+  }
+  
+  .talk-button {
+    @apply bg-[#d5c6ad] hover:bg-[#c0b298] text-gray-800 font-light py-3 rounded-full text-sm uppercase tracking-wider;
+  }
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+  font-weight: 300; /* Light weight */
+}
+
+.font-opensans {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400; /* Regular weight */
+}
+
+.font-ephesis {
+  font-family: 'Ephesis', cursive;
+  font-weight: 400;
+  font-style: normal;
+  /* Scale up the font size by 20% */
+  font-size: 1.6em;
+  /* Optionally adjust the line height to maintain layout */
+  line-height: 1;
+}
