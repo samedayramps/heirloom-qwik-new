@@ -1,4 +1,4 @@
-import { component$, useSignal, useOnDocument, $ } from '@builder.io/qwik';
+import { component$, useSignal, useOnWindow, $ } from '@builder.io/qwik';
 
 interface Step {
   number: number;
@@ -14,8 +14,8 @@ export const Stepper = component$<StepperProps>(({ steps }) => {
   const isVisible = useSignal(false);
   const stepperRef = useSignal<Element>();
 
-  // Simplified visibility detection
-  useOnDocument('scroll', $(() => {
+  // Use window scroll for better visibility detection
+  useOnWindow('scroll', $(() => {
     if (!stepperRef.value) return;
     
     const rect = stepperRef.value.getBoundingClientRect();

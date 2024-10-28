@@ -1,4 +1,4 @@
-import { component$, useSignal, useOnDocument, $, useContext } from "@builder.io/qwik";
+import { component$, useSignal, useOnWindow, $, useContext } from "@builder.io/qwik";
 import { ContentWrapper } from "../ContentWrapper/ContentWrapper";
 import { GlobalStore } from "~/context/global";
 
@@ -29,8 +29,8 @@ export default component$(() => {
   const sectionRef = useSignal<Element>();
   const globalStore = useContext(GlobalStore);
 
-  // Simplified visibility detection
-  useOnDocument('scroll', $(() => {
+  // Use window scroll for better visibility detection
+  useOnWindow('scroll', $(() => {
     if (!sectionRef.value) return;
     
     const rect = sectionRef.value.getBoundingClientRect();

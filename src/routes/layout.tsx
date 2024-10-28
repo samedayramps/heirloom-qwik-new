@@ -1,4 +1,4 @@
-import { component$, Slot, useStore, useContextProvider } from "@builder.io/qwik";
+import { component$, Slot, useStore, useContextProvider, useTask$ } from "@builder.io/qwik";
 import { NavBar } from '~/components/NavBar/NavBar';
 import { Footer } from '~/components/Footer/Footer';
 import { GlobalStore, type GlobalStoreType } from "~/context/global";
@@ -10,6 +10,14 @@ export default component$(() => {
     isModalOpen: false,
   });
   useContextProvider(GlobalStore, globalStore);
+
+  // Handle body scroll lock
+  useTask$(({ track }) => {
+    track(() => globalStore.isModalOpen);
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = globalStore.isModalOpen ? 'hidden' : '';
+    }
+  });
 
   return (
     <div class="flex flex-col min-h-screen">

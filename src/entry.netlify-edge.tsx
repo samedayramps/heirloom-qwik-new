@@ -19,9 +19,4 @@ declare global {
   interface QwikCityPlatform extends PlatformNetlify {}
 }
 
-export default createQwikCity({ 
-  render, 
-  qwikCityPlan, 
-  manifest,
-  // Remove static property as it's not supported
-});
+export default createQwikCity({ render, qwikCityPlan, manifest });
