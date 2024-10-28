@@ -1,4 +1,4 @@
-import { component$, useSignal, useOnWindow, $ } from '@builder.io/qwik';
+import { component$, useSignal, useOnDocument, $ } from '@builder.io/qwik';
 
 interface Step {
   number: number;
@@ -14,27 +14,16 @@ export const Stepper = component$<StepperProps>(({ steps }) => {
   const isVisible = useSignal(false);
   const stepperRef = useSignal<Element>();
 
-  // Lazy load animation when stepper becomes visible
-  useOnWindow('scroll', $(() => {
+  // Simplified visibility detection
+  useOnDocument('scroll', $(() => {
     if (!stepperRef.value) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            isVisible.value = true;
-            observer.disconnect();
-          }
-        });
-      },
-      { 
-        threshold: 0.1,
-        rootMargin: '50px' 
-      }
-    );
-
-    observer.observe(stepperRef.value);
-    return () => observer.disconnect();
+    
+    const rect = stepperRef.value.getBoundingClientRect();
+    const isInViewport = rect.top < window.innerHeight && rect.bottom >= 0;
+    
+    if (isInViewport) {
+      isVisible.value = true;
+    }
   }));
 
   return (

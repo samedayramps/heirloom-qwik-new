@@ -1,5 +1,6 @@
-import { component$, useSignal, useOnWindow, $ } from "@builder.io/qwik";
+import { component$, useSignal, useOnDocument, $, useContext } from "@builder.io/qwik";
 import { ContentWrapper } from "../ContentWrapper/ContentWrapper";
+import { GlobalStore } from "~/context/global";
 
 interface FAQItem {
   question: string;
@@ -26,28 +27,18 @@ export default component$(() => {
   const openIndex = useSignal<number | null>(null);
   const isVisible = useSignal(false);
   const sectionRef = useSignal<Element>();
+  const globalStore = useContext(GlobalStore);
 
-  // Use scroll event for lazy loading
-  useOnWindow('scroll', $(() => {
+  // Simplified visibility detection
+  useOnDocument('scroll', $(() => {
     if (!sectionRef.value) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            isVisible.value = true;
-            observer.disconnect();
-          }
-        });
-      },
-      { 
-        threshold: 0.1,
-        rootMargin: '50px' 
-      }
-    );
-
-    observer.observe(sectionRef.value);
-    return () => observer.disconnect();
+    
+    const rect = sectionRef.value.getBoundingClientRect();
+    const isInViewport = rect.top < window.innerHeight && rect.bottom >= 0;
+    
+    if (isInViewport) {
+      isVisible.value = true;
+    }
   }));
 
   return (
@@ -71,7 +62,12 @@ export default component$(() => {
       <ContentWrapper>
         <div class="max-w-4xl mx-auto text-center relative z-10">
           <h2 class="font-playfair text-3xl md:text-4xl text-white mb-16 flex items-center justify-center gap-8">
-            Have questions? <button class="talk-button px-8">LET'S TALK</button>
+            Have questions?{" "}
+            <button onClick$={() => {
+              globalStore.isModalOpen = true;
+            }} class="talk-button px-8">
+              LET'S TALK
+            </button>
           </h2>
 
           <div class="space-y-4 text-left">
