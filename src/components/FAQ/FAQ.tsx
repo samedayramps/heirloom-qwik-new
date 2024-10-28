@@ -1,4 +1,4 @@
-import { component$, useSignal, useVisibleTask$ } from "@builder.io/qwik";
+import { component$, useSignal, useOnWindow, $ } from "@builder.io/qwik";
 import { ContentWrapper } from "../ContentWrapper/ContentWrapper";
 
 interface FAQItem {
@@ -6,7 +6,8 @@ interface FAQItem {
   answer: string;
 }
 
-const faqItems: FAQItem[] = [
+// Move static data outside component
+const FAQ_ITEMS: FAQItem[] = [
   {
     question: "When will we receive our wedding film?",
     answer: "Your wedding film will be delivered within 12-16 weeks after your wedding date. We take great care in crafting each film to ensure it perfectly captures your special day.",
@@ -23,27 +24,42 @@ const faqItems: FAQItem[] = [
 
 export default component$(() => {
   const openIndex = useSignal<number | null>(null);
-  const isTextureLoaded = useSignal(false);
+  const isVisible = useSignal(false);
+  const sectionRef = useSignal<Element>();
 
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(() => {
-    const img = new Image();
-    img.src = '/images/18-texture.webp';
-    img.onload = () => {
-      isTextureLoaded.value = true;
-    };
-  });
+  // Use scroll event for lazy loading
+  useOnWindow('scroll', $(() => {
+    if (!sectionRef.value) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            isVisible.value = true;
+            observer.disconnect();
+          }
+        });
+      },
+      { 
+        threshold: 0.1,
+        rootMargin: '50px' 
+      }
+    );
+
+    observer.observe(sectionRef.value);
+    return () => observer.disconnect();
+  }));
 
   return (
-    <section class="relative bg-[#315141] py-24 overflow-hidden">
+    <section ref={sectionRef} class="relative bg-[#315141] py-24 overflow-hidden">
       {/* Texture Overlay */}
       <div 
         class={[
-          "absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none transition-opacity duration-700",
-          isTextureLoaded.value ? "opacity-30" : "opacity-0"
+          "absolute inset-0 opacity-0 mix-blend-overlay pointer-events-none transition-opacity duration-700",
+          isVisible.value ? "opacity-30" : ""
         ].join(" ")}
         style={{
-          backgroundImage: isTextureLoaded.value ? 'url(/images/18-texture.webp)' : undefined,
+          backgroundImage: isVisible.value ? 'url(/images/18-texture.webp)' : undefined,
           backgroundSize: '100% auto',
           backgroundPosition: 'top center',
           backgroundRepeat: 'repeat-y',
@@ -59,21 +75,25 @@ export default component$(() => {
           </h2>
 
           <div class="space-y-4 text-left">
-            {faqItems.map((item, index) => (
+            {FAQ_ITEMS.map((item, index) => (
               <div
                 key={index}
-                class="bg-white rounded-lg overflow-hidden"
+                class={[
+                  "bg-white rounded-lg overflow-hidden transform transition-transform duration-500",
+                  isVisible.value ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+                  `transition-delay-${index * 100}`
+                ].join(" ")}
               >
                 <button
                   onClick$={() => {
                     openIndex.value = openIndex.value === index ? null : index;
                   }}
-                  class="w-full text-left px-6 py-5 flex justify-between items-center hover:bg-gray-50 transition-colors duration-500"
+                  class="w-full text-left px-6 py-5 flex justify-between items-center hover:bg-gray-50 transition-colors duration-300"
                 >
                   <span class="text-xl font-playfair">{item.question}</span>
                   <span 
                     class={[
-                      "transform transition-transform duration-700 ease-in-out",
+                      "transform transition-transform duration-300",
                       openIndex.value === index ? "rotate-180" : ""
                     ].join(" ")}
                   >
@@ -83,6 +103,7 @@ export default component$(() => {
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
                     >
                       <path
                         d="M19 9L12 16L5 9"
@@ -95,13 +116,12 @@ export default component$(() => {
                   </span>
                 </button>
                 <div
-                  class="overflow-hidden transition-all duration-700 ease-in-out"
-                  style={{
-                    maxHeight: openIndex.value === index ? '500px' : '0',
-                    opacity: openIndex.value === index ? '1' : '0',
-                  }}
+                  class={[
+                    "transition-all duration-300",
+                    openIndex.value === index ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+                  ].join(" ")}
                 >
-                  <div class="px-6 pb-5 text-gray-600">
+                  <div class="px-6 pb-5 text-gray-600 font-opensans">
                     {item.answer}
                   </div>
                 </div>

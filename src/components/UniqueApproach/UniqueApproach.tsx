@@ -1,27 +1,13 @@
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { component$ } from '@builder.io/qwik';
 
 export default component$(() => {
-  const isTextureLoaded = useSignal(false);
-
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(() => {
-    const img = new Image();
-    img.src = '/images/16-texture-square.webp';
-    img.onload = () => {
-      isTextureLoaded.value = true;
-    };
-  });
-
   return (
     <section class="relative bg-[#d5c6ad] w-full py-16 overflow-hidden">
       {/* Texture Overlay */}
       <div 
-        class={[
-          "absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none transition-opacity duration-700",
-          isTextureLoaded.value ? "opacity-30" : "opacity-0"
-        ].join(" ")}
+        class="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none"
         style={{
-          backgroundImage: isTextureLoaded.value ? 'url(/images/16-texture-square.webp)' : undefined,
+          backgroundImage: 'url(/images/16-texture-square.webp)',
           backgroundSize: '100% auto',
           backgroundPosition: 'top center',
           backgroundRepeat: 'repeat-y',

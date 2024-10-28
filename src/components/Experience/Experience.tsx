@@ -1,7 +1,15 @@
 import { component$ } from '@builder.io/qwik';
 import { Stepper } from '../Stepper/Stepper';
 
-const EXPERIENCE_STEPS = [
+// Define the type to match the Step interface
+type ExperienceStep = {
+  number: number;
+  title: string;
+  description: string;
+};
+
+// Move static data outside component to prevent recreation
+const EXPERIENCE_STEPS: ExperienceStep[] = [
   {
     number: 1,
     title: 'Initial Call',
@@ -36,6 +44,7 @@ export default component$(() => {
             From our first hello to the moment you receive your heirloom film, we're here to make everything easy and enjoyable.
           </p>
           
+          {/* Lazy load the stepper component */}
           <Stepper steps={EXPERIENCE_STEPS} />
         </div>
       </div>

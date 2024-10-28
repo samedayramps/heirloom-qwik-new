@@ -43,6 +43,12 @@ export const RouterHead = component$(() => {
             : { dangerouslySetInnerHTML: s.script })}
         />
       ))}
+      <link 
+        rel="preload" 
+        as="image" 
+        href="/images/16-texture-square.webp" 
+        type="image/webp"
+      />
     </>
   );
 });

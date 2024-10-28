@@ -1,4 +1,4 @@
-import { component$ } from '@builder.io/qwik';
+import { component$, useSignal, useOnWindow, $ } from '@builder.io/qwik';
 
 interface Step {
   number: number;
@@ -11,13 +11,46 @@ interface StepperProps {
 }
 
 export const Stepper = component$<StepperProps>(({ steps }) => {
+  const isVisible = useSignal(false);
+  const stepperRef = useSignal<Element>();
+
+  // Lazy load animation when stepper becomes visible
+  useOnWindow('scroll', $(() => {
+    if (!stepperRef.value) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            isVisible.value = true;
+            observer.disconnect();
+          }
+        });
+      },
+      { 
+        threshold: 0.1,
+        rootMargin: '50px' 
+      }
+    );
+
+    observer.observe(stepperRef.value);
+    return () => observer.disconnect();
+  }));
+
   return (
-    <div class="relative">
+    <div ref={stepperRef} class="relative">
       {/* Desktop version */}
       <div class="hidden md:block">
         <ul class="grid grid-cols-4">
           {steps.map((step, index) => (
-            <li key={step.number} class="relative group">
+            <li 
+              key={step.number} 
+              class={[
+                "relative transform transition-transform duration-500",
+                isVisible.value ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
+                `transition-delay-${index * 100}`
+              ].join(" ")}
+            >
               <div class="flex items-center w-full">
                 {/* Circle with number */}
                 <div class="relative z-10 flex-shrink-0 w-10 h-10 bg-[#d5c6ad] rounded-full flex items-center justify-center">
@@ -27,7 +60,11 @@ export const Stepper = component$<StepperProps>(({ steps }) => {
                 </div>
                 {/* Connecting line */}
                 {index !== steps.length - 1 && (
-                  <div class="h-0.5 flex-1 mx-2 bg-[#d5c6ad] rounded-full"></div>
+                  <div class={[
+                    "h-0.5 flex-1 mx-2 bg-[#d5c6ad] rounded-full transform transition-transform duration-500",
+                    isVisible.value ? "scale-x-100" : "scale-x-0",
+                    `transition-delay-${index * 100}`
+                  ].join(" ")}></div>
                 )}
               </div>
               {/* Content */}
@@ -41,9 +78,16 @@ export const Stepper = component$<StepperProps>(({ steps }) => {
       </div>
 
       {/* Mobile version */}
-      <ul class="md:hidden">
+      <ul class="md:hidden space-y-6">
         {steps.map((step, index) => (
-          <li key={step.number} class="flex group">
+          <li 
+            key={step.number} 
+            class={[
+              "flex group transform transition-transform duration-500",
+              isVisible.value ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0",
+              `transition-delay-${index * 100}`
+            ].join(" ")}
+          >
             <div class="flex flex-col items-center">
               {/* Circle with number */}
               <div class="relative z-10 w-10 h-10 bg-[#d5c6ad] rounded-full flex items-center justify-center">
@@ -53,7 +97,11 @@ export const Stepper = component$<StepperProps>(({ steps }) => {
               </div>
               {/* Vertical line */}
               {index !== steps.length - 1 && (
-                <div class="w-0.5 flex-1 my-2 bg-[#d5c6ad] rounded-full"></div>
+                <div class={[
+                  "w-0.5 flex-1 my-2 bg-[#d5c6ad] rounded-full transform transition-transform duration-500",
+                  isVisible.value ? "scale-y-100" : "scale-y-0",
+                  `transition-delay-${index * 100}`
+                ].join(" ")}></div>
               )}
             </div>
             {/* Content */}

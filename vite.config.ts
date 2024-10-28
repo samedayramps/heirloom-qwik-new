@@ -58,6 +58,33 @@ export default defineConfig(({ command, mode }): UserConfig => {
         "Cache-Control": "public, max-age=600",
       },
     },
+    build: {
+      target: 'esnext',
+      modulePreload: {
+        polyfill: false,
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Split vendor chunks
+            'vendor': [
+              '@builder.io/qwik',
+              '@builder.io/qwik-city',
+            ],
+          },
+        },
+      },
+      // Optimize chunk size
+      chunkSizeWarningLimit: 1000,
+      // Enable minification
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
+    },
   };
 });
 

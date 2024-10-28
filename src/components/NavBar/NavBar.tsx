@@ -1,5 +1,7 @@
-import { component$, useSignal, type QRL, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useSignal, type QRL, useOnDocument, $, useComputed$ } from '@builder.io/qwik';
 import { Link } from '@builder.io/qwik-city';
+import LogoSvg from '~/media/images/logo.svg?jsx';
+import LogoMobileSvg from '~/media/images/logo-mobile.svg?jsx';
 
 interface NavLink {
   href: string;
@@ -20,38 +22,36 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
   const isMenuOpen = useSignal(false);
   const isScrolled = useSignal(false);
 
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          isScrolled.value = window.scrollY > 50;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
+  // Use useOnDocument with $() wrapper for the handler
+  useOnDocument(
+    'scroll',
+    $(() => {
+      isScrolled.value = window.scrollY > 50;
+    })
+  );
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  });
+  // Computed classes
+  const mainNavClasses = useComputed$(() => ({
+    'transition-all duration-700 ease-in-out transform': true,
+    'px-4 mt-4': isScrolled.value
+  }));
+
+  const containerClasses = useComputed$(() => ({
+    'bg-[#2d2d2d] transition-all duration-700 ease-in-out transform': true,
+    'container rounded-full shadow-lg': isScrolled.value
+  }));
+
+  const innerContainerClasses = useComputed$(() => ({
+    'transition-all duration-700 ease-in-out': true,
+    'px-4 sm:px-6 lg:px-8': !isScrolled.value
+  }));
 
   return (
     <nav class="fixed w-full z-50">
       {/* Main navbar */}
-      <div class={[
-        'transition-all duration-700 ease-in-out transform',
-        isScrolled.value ? 'px-4 mt-4' : ''
-      ]}>
-        <div class={[
-          'bg-[#2d2d2d] transition-all duration-700 ease-in-out transform',
-          isScrolled.value ? 'container rounded-full shadow-lg' : ''
-        ]}>
-          <div class={[
-            'transition-all duration-700 ease-in-out',
-            isScrolled.value ? '' : 'px-4 sm:px-6 lg:px-8'
-          ]}>
+      <div class={mainNavClasses.value}>
+        <div class={containerClasses.value}>
+          <div class={innerContainerClasses.value}>
             <div class="flex items-center justify-between h-16">
               {/* Left side: Hamburger menu and Logo */}
               <div class="flex items-center space-x-4">
@@ -76,11 +76,8 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
                 </button>
 
                 <Link href="/" class="flex-shrink-0">
-                  <img 
-                    src="/images/logo.svg" 
-                    alt="Heirloom Wedding Films Logo" 
-                    class="h-8 w-auto"
-                  />
+                  <LogoSvg class="hidden md:block h-8 w-auto" />
+                  <LogoMobileSvg class="block md:hidden h-8 w-auto" />
                 </Link>
 
                 <div class="hidden md:block">
@@ -90,6 +87,7 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
                         key={link.href} 
                         class="nav-link transition-colors duration-300" 
                         href={link.href}
+                        prefetch
                       >
                         {link.text}
                       </Link>
@@ -101,11 +99,13 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
               {/* Right side: Let's Talk button */}
               <button
                 onClick$={onOpenModal$}
-                class={[
-                  'talk-button',
-                  'md:px-6 px-4',
-                  'transition-all duration-300'
-                ]}
+                class={{
+                  'talk-button': true,
+                  'md:px-6': true,
+                  'px-4': true,
+                  'transition-all': true,
+                  'duration-300': true
+                }}
               >
                 Let's Talk
               </button>
@@ -116,10 +116,11 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
 
       {/* Mobile menu dropdown */}
       <div 
-        class={[
-          'md:hidden container mt-4 transition-all duration-500 ease-in-out transform',
-          isMenuOpen.value ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
-        ]}
+        class={{
+          'md:hidden container mt-4 transition-all duration-500 ease-in-out transform': true,
+          'opacity-100 translate-y-0': isMenuOpen.value,
+          'opacity-0 -translate-y-4 pointer-events-none': !isMenuOpen.value
+        }}
       >
         <div class="bg-[#2d2d2d] rounded-2xl shadow-lg overflow-hidden">
           <div class="px-4 py-4 space-y-3">
@@ -128,6 +129,7 @@ export const NavBar = component$<NavBarProps>(({ onOpenModal$ }) => {
                 key={link.href}
                 class="nav-link block w-full text-left transition-colors duration-300" 
                 href={link.href}
+                prefetch
               >
                 {link.text}
               </Link>
