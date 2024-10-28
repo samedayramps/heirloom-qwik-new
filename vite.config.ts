@@ -65,13 +65,17 @@ export default defineConfig(({ command, mode }): UserConfig => {
       },
       rollupOptions: {
         output: {
-          manualChunks: {
-            // Split vendor chunks
-            'vendor': [
-              '@builder.io/qwik',
-              '@builder.io/qwik-city',
-            ],
-          },
+          manualChunks(id: string) {
+            if (id.includes('node_modules')) {
+              if (id.includes('@builder.io/qwik')) {
+                return 'qwik';
+              }
+              if (id.includes('@builder.io/qwik-city')) {
+                return 'qwik-city';
+              }
+              return 'vendor';
+            }
+          }
         },
       },
       // Optimize chunk size
